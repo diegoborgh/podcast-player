@@ -1,100 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jacinto // Podcast Player</title>
-    <!-- Zero to Mastery Favicon -->
-    <link rel="icon" type="image/png" href="favicon.png">
-    <!-- FontAwesome V5 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
-    <!-- Manifest -->
-    <link rel="manifest" href="/manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airwave — Podcast Discovery</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%23F97316'/><path d='M8 20c0-6.6 5.4-12 12-12' stroke='white' stroke-width='2.5' stroke-linecap='round'/><path d='M24 12c0 6.6-5.4 12-12 12' stroke='white' stroke-width='2.5' stroke-linecap='round'/><path d='M11.5 24c0-2.5 2-4.5 4.5-4.5' stroke='white' stroke-width='2' stroke-linecap='round' opacity='.7'/><path d='M20.5 8c0 2.5-2 4.5-4.5 4.5' stroke='white' stroke-width='2' stroke-linecap='round' opacity='.7'/><circle cx='16' cy='16' r='2.5' fill='white'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
+<div id="app">
 
-    <!-- Navigation -->
-    <div class="nav-wrapper">
-        <nav class="nav">
-            <h1 class="nav-title">Podcast Player</h1>
-            <i class="fas fa-microphone-alt"></i>
-            <!-- Mobile Navigation -->
-            <div class="nav-list">
-                <span id="searchLink" class="selected">Search</span>
-                <span id="listenLink">Listen</span>
-            </div>
-        </nav>
+  <!-- Navbar -->
+  <nav id="navbar">
+    <a class="logo" href="#" onclick="showHome();return false;">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 14c0-4.4 3.6-8 8-8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M20 10c0 4.4-3.6 8-8 8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M7.5 17.5c0-2.5 2-4.5 4.5-4.5" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+          <path d="M16.5 6.5c0 2.5-2 4.5-4.5 4.5" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+          <circle cx="12" cy="12" r="1.8" fill="white"/>
+        </svg>
+      </div>
+      Airwave
+    </a>
+
+    <div class="nav-right">
+      <div class="sf">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="si" placeholder="Search podcasts or topics…" />
+      </div>
+      <button class="btn-go" onclick="doSearch()">Search</button>
+      <button class="ib" id="theme-btn" onclick="toggleTheme()">
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main id="main">
+
+    <!-- Home -->
+    <div class="view active" id="view-home">
+      <div class="hero" id="hero-wrap">
+        <div class="hero-bg" id="hero-bg">🎙️</div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-label">Featured Today</div>
+          <div class="hero-title" id="hero-title">Discover Your Next Favourite Show</div>
+          <div class="hero-sub" id="hero-sub">Trending in podcasts</div>
+          <button class="hero-cta" onclick="openHero()">
+            <i class="fa-solid fa-play"></i> Listen Now
+          </button>
+        </div>
+      </div>
+
+      <div style="padding-top:18px;">
+        <div class="cat-strip" id="cat-strip"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sh">
+          <h2 class="sh-t">New from Your Podcasts</h2>
+          <span class="sh-s" id="new-eps-count"></span>
+        </div>
+        <div id="new-eps-strip"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sh">
+          <h2 class="sh-t">Trending Now</h2>
+          <span class="sh-s">Updated daily</span>
+        </div>
+        <div class="pg" id="trending-grid"></div>
+      </div>
     </div>
 
-    <div class="page-wrapper">
-        <!-- Search Container -->
-        <div class="search-container">
-            <!-- Search History -->
-            <div class="custom-select">
-                <select name="searchHistory" id="searchHistory" title="Search History">
-                    <option value="">Select a Previous Search</option>
-                </select>
-            </div>
-            <!-- Search Input -->
-            <input type="text" id="searchInput" placeholder="Search by Podcast / Topic">
-            <!-- Search Buttons -->
-            <div class="search-buttons">
-                <button type="button" id="searchButton">Search</button>
-                <button type="button" id="resetButton">Clear History</button>
-            </div>
-        </div>
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Loader -->
-            <div id="loader" class="loader-container">
-                <i class="fas fa-microphone-alt"></i>
-            </div>
-            <!-- Cards Container -->
-            <div id="response" class="cards-container"></div>
-        </div>
-
-        <!-- Player Container -->
-        <div class="player-container">
-            <!-- Player -->
-            <div class="player">
-                <!-- Image -->
-                <div class="img-container">
-                    <img id="image" src="./default-podcast.png" alt="Podcast Image">
-                </div>
-                <!-- Title / Date -->
-                <div class="title-container">
-                    <h2 id="title">Podcast Title</h2>
-                    <h3 id="datePublished">Date Published</h3>
-                </div>
-                <!-- Audio Element -->
-                <audio id="player" src=""></audio>
-                <div class="controls-container">
-                    <!-- Progress -->
-                    <div class="progress-container" id="progress-container">
-                        <div class="progress" id="progress"></div>
-                        <div class="duration-wrapper">
-                            <span id="current-time">0:00</span>
-                            <span id="duration">0:00</span>
-                        </div>
-                    </div>
-                    <!-- Controls -->
-                    <div class="player-controls">
-                        <i class="fas fa-backward" id="prev" title="-15 Seconds"></i>
-                        <i class="fas fa-play main-button" id="play" title="Play"></i>
-                        <i class="fas fa-forward" id="next" title="+15 Seconds"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Queue -->
-            <div class="queue">
-            </div>
-        </div>
+    <!-- Search -->
+    <div class="view" id="view-search">
+      <div class="sec">
+        <div class="sh"><h2 class="sh-t" id="srch-title">Results</h2></div>
+        <div id="srch-body"></div>
+      </div>
     </div>
 
-    <!-- Script -->
-    <script src="script.js"></script>
+    <!-- Detail -->
+    <div class="view" id="view-detail">
+      <button class="back-btn" onclick="goBack()">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </button>
+      <div id="det-header"></div>
+      <div class="sec" style="padding-top:0;">
+        <div class="sh">
+          <h2 class="sh-t">Episodes</h2>
+          <span class="sh-s" id="ep-ct"></span>
+        </div>
+        <div id="ep-list"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="collapsed">
+    <div id="player">
+      <button class="player-toggle" id="player-toggle" onclick="togglePlayerCollapse()" aria-label="Toggle player">
+        <i class="fa-solid fa-chevron-up" id="player-toggle-icon"></i>
+      </button>
+      <div class="np-pill" id="np-pill"><span class="np-dot"></span> Now Playing</div>
+
+      <div class="pl-art-wrap">
+        <div id="pl-art-ph">🎧</div>
+        <img id="pl-art" alt="" />
+        <div class="waveform" id="waveform">
+          <div class="wf-bar"></div><div class="wf-bar"></div><div class="wf-bar"></div>
+          <div class="wf-bar"></div><div class="wf-bar"></div><div class="wf-bar"></div>
+          <div class="wf-bar"></div>
+        </div>
+      </div>
+
+      <div class="pl-info">
+        <div id="pl-title">Select an episode to play</div>
+        <div id="pl-show"></div>
+      </div>
+
+      <div class="prog-wrap">
+        <div class="prog-outer" id="prog-bar" onclick="seekAudio(event)">
+          <div class="prog-fill" id="prog-fill"></div>
+        </div>
+        <div class="prog-times">
+          <span id="t-cur">0:00</span>
+          <span id="t-tot">0:00</span>
+        </div>
+      </div>
+
+      <div class="pl-ctrls">
+        <button class="ctrl" onclick="skip(-15)">
+          <div class="skip-w"><i class="fa-solid fa-rotate-left"></i><span>15</span></div>
+        </button>
+        <button class="ctrl play" id="play-btn" onclick="togglePlay()">
+          <i class="fa-solid fa-play" id="play-icon"></i>
+        </button>
+        <button class="ctrl" onclick="skip(30)">
+          <div class="skip-w"><i class="fa-solid fa-rotate-right"></i><span>30</span></div>
+        </button>
+      </div>
+
+      <div class="speed-row" id="speed-row"></div>
+
+      <div class="vol-row">
+        <button class="vib" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="vol-icon"></i></button>
+        <input type="range" id="vs" min="0" max="100" value="80" oninput="setVol(this.value)" style="--vp:80%;" />
+      </div>
+    </div>
+
+    <div class="sb-tabs">
+      <button class="sbt on" onclick="switchTab('queue',this)">Queue</button>
+      <button class="sbt" onclick="switchTab('favs',this)">Favorites</button>
+      <button class="sbt" onclick="switchTab('hist',this)">History</button>
+    </div>
+    <div class="sb-body">
+      <div class="sbp on" id="panel-queue"></div>
+      <div class="sbp" id="panel-favs"></div>
+      <div class="sbp" id="panel-hist"></div>
+    </div>
+  </aside>
+</div>
+
+<div id="tw"></div>
+<audio id="audio"></audio>
+
+<script src="/script.js"></script>
 </body>
 </html>

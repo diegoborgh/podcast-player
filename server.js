@@ -39,7 +39,7 @@ app.get('/api/search', async (req, res) => {
     const headers = generateAuthHeaders();
 
     try {
-        const response = await fetch(`${apiEndpoint}/search/byterm?q=${encodeURIComponent(query)}`, {
+        const response = await fetch(`${apiEndpoint}/search/byterm?q=${encodeURIComponent(query)}&lang=en&max=20`, {
             method: 'GET',
             headers: headers
         });
@@ -84,6 +84,28 @@ app.get('/api/episodes', async (req, res) => {
         }
     } catch (error) {
         console.error('Error fetching API:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Fetch trending podcasts
+app.get('/api/trending', async (req, res) => {
+    const max = req.query.max || 50;
+    const headers = generateAuthHeaders();
+    try {
+        const response = await fetch(`${apiEndpoint}/podcasts/trending?max=${max}&lang=en`, {
+            method: 'GET',
+            headers: headers
+        });
+        if (response.ok && response.headers.get('content-type').includes('application/json')) {
+            const data = await response.json();
+            res.json(data);
+        } else {
+            const rawText = await response.text();
+            res.status(500).json({ error: 'Invalid response from API', rawText });
+        }
+    } catch (error) {
+        console.error('Error fetching trending:', error.message);
         res.status(500).json({ error: error.message });
     }
 });

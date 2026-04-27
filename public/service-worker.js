@@ -1,4 +1,4 @@
-const cacheName = 'podcast-player-v2';
+const cacheName = 'airwave-v9';
 const assetsToCache = [
   '/',
   '/index.html',

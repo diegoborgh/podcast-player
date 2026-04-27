@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airwave — Podcast Discovery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:      #F97316;
+      --accent-h:    #EA6A0A;
+      --accent-soft: rgba(249,115,22,0.12);
+      --accent-glow: rgba(249,115,22,0.28);
+      --green:       #34D399;
+      --pink:        #F472B6;
+
+      --bg:          #0C0C0E;
+      --surface:     #141416;
+      --surface2:    #1C1C20;
+      --surface3:    #252529;
+      --border:      rgba(255,255,255,0.07);
+      --border-s:    rgba(255,255,255,0.12);
+
+      --text:        #F4F3F8;
+      --text-m:      #72717E;
+      --text-s:      #3A3940;
+
+      --sh-sm: 0 1px 3px rgba(0,0,0,0.5);
+      --sh:    0 4px 20px rgba(0,0,0,0.4);
+      --sh-lg: 0 12px 48px rgba(0,0,0,0.55);
+
+      --r:    14px;
+      --r-sm:  9px;
+      --r-xs:  5px;
+      --nav-h: 58px;
+      --sb-w:  300px;
+      --t: 0.18s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    [data-theme="light"] {
+      --bg:       #F7F6F3;
+      --surface:  #FFFFFF;
+      --surface2: #EEEDE9;
+      --surface3: #E2E0DC;
+      --border:   rgba(0,0,0,0.07);
+      --border-s: rgba(0,0,0,0.13);
+      --text:     #18170F;
+      --text-m:   #7A7870;
+      --text-s:   #C4C2BC;
+      --sh-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --sh:    0 4px 20px rgba(0,0,0,0.09);
+      --sh-lg: 0 12px 48px rgba(0,0,0,0.12);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      background: var(--bg);
+      transition: background var(--t), color var(--t);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app {
+      display: grid;
+      grid-template-rows: var(--nav-h) 1fr;
+      grid-template-columns: 1fr var(--sb-w);
+      grid-template-areas: "nav nav" "main sidebar";
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Navbar ──────────────────────────────────── */
+    #navbar {
+      grid-area: nav;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; font-size: 18px;
+      color: var(--text); text-decoration: none;
+      white-space: nowrap; flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+    .logo-mark {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px var(--accent-glow);
+    }
+    .logo-mark svg { width: 18px; height: 18px; }
+
+    .search-row { flex: 1; display: flex; gap: 8px; max-width: 520px; }
+    .sf { flex: 1; position: relative; }
+    .sf i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-s); font-size: 13px; pointer-events: none; }
+    #si {
+      width: 100%; padding: 8px 12px 8px 35px;
+      border: 1px solid var(--border-s);
+      border-radius: var(--r-sm);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 14px; outline: none;
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+    #si:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    #si::placeholder { color: var(--text-s); }
+
+    .btn-go {
+      padding: 8px 16px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      font-family: 'Instrument Sans', sans-serif;
+      font-weight: 600; font-size: 14px;
+      cursor: pointer; white-space: nowrap;
+      transition: background var(--t), transform var(--t);
+    }
+    .btn-go:hover { background: var(--accent-h); transform: translateY(-1px); }
+    .btn-go:active { transform: none; }
+
+    #hsel {
+      padding: 8px 10px;
+      border: 1px solid var(--border-s);
+      border-radius: var(--r-sm);
+      background: var(--surface2);
+      color: var(--text-m);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 13px; cursor: pointer; outline: none;
+      max-width: 145px;
+      transition: background var(--t);
+    }
+
+    .nav-end { display: flex; gap: 5px; margin-left: auto; }
+    .ib {
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      border: none; background: transparent;
+      color: var(--text-m); border-radius: var(--r-xs);
+      cursor: pointer; font-size: 14px;
+      transition: background var(--t), color var(--t);
+    }
+    .ib:hover { background: var(--surface2); color: var(--text); }
+
+    /* ── Main ────────────────────────────────────── */
+    #main { grid-area: main; overflow-y: auto; scroll-behavior: smooth; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Hero banner */
+    .hero {
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #1a0a00, #2d1500);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 96px;
+      filter: blur(0px);
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.85) 40%, transparent 100%);
+    }
+    .hero-content {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      justify-content: center;
+      padding: 0 28px;
+    }
+    .hero-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hero-label::before { content:''; width: 18px; height: 2px; background: var(--accent); border-radius: 2px; }
+    .hero-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; font-size: 28px;
+      line-height: 1.15; letter-spacing: -0.02em;
+      color: #fff; margin-bottom: 6px;
+      max-width: 340px;
+    }
+    .hero-sub { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 16px; }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 16px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 99px;
+      font-family: 'Instrument Sans', sans-serif;
+      font-weight: 600; font-size: 13px;
+      cursor: pointer; align-self: flex-start;
+      transition: background var(--t), transform var(--t);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+    .hero-cta:hover { background: var(--accent-h); transform: translateY(-1px); }
+
+    /* Section */
+    .sec { padding: 22px 24px; }
+    .sh { display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+    .sh-t { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+    .sh-s { font-size: 12px; color: var(--text-m); }
+
+    /* Podcast grid */
+    .pg { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+
+    .pc {
+      background: var(--surface);
+      border-radius: var(--r); overflow: hidden;
+      cursor: pointer; border: 1px solid var(--border);
+      transition: transform var(--t), box-shadow var(--t), border-color var(--t);
+    }
+    .pc:hover { transform: translateY(-2px); box-shadow: var(--sh); border-color: var(--border-s); }
+
+    .pc-art-wrap { position: relative; }
+    .pc-art-ph { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+    .pc-art { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .pc-rank {
+      position: absolute; top: 6px; left: 6px;
+      background: rgba(0,0,0,0.6); color: #fff;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: 99px;
+      backdrop-filter: blur(4px);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .fav-btn {
+      position: absolute; top: 6px; right: 6px;
+      width: 26px; height: 26px;
+      background: rgba(0,0,0,0.5); border: none;
+      border-radius: 50%; color: #fff; font-size: 10px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+      transition: background var(--t), transform var(--t);
+    }
+    .fav-btn:hover { background: rgba(0,0,0,0.75); transform: scale(1.1); }
+    .fav-btn.on { color: var(--pink); }
+
+    .pc-body { padding: 10px 11px 12px; }
+    .pc-t {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 13px; line-height: 1.35;
+      color: var(--text); display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; margin-bottom: 3px;
+    }
+    .pc-a { font-size: 12px; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Category strip */
+    .cat-strip {
+      display: flex; gap: 6px;
+      padding: 0 24px 18px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cat-strip::-webkit-scrollbar { display: none; }
+    .cat {
+      padding: 5px 12px; border-radius: 99px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      background: var(--surface2); color: var(--text-m);
+      border: none; flex-shrink: 0;
+      transition: all var(--t);
+    }
+    .cat:hover { background: var(--surface3); color: var(--text); }
+    .cat.on { background: var(--accent); color: #fff; }
+
+    /* Episode list */
+    .el { display: flex; flex-direction: column; gap: 1px; }
+
+    .ec {
+      background: var(--surface);
+      padding: 13px 16px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--t);
+    }
+    .ec:first-child { border-radius: var(--r) var(--r) 0 0; }
+    .ec:last-child  { border-radius: 0 0 var(--r) var(--r); border-bottom: none; }
+    .ec:only-child  { border-radius: var(--r); }
+    .ec:hover { background: var(--surface2); }
+    .ec.playing { background: var(--accent-soft); border-left: 2px solid var(--accent); }
+    .ec.played { opacity: 0.5; }
+
+    .ec-thumb {
+      width: 48px; height: 48px; border-radius: 8px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .ec-info { flex: 1; min-width: 0; }
+    .ec-t {
+      font-weight: 600; font-size: 14px; line-height: 1.35;
+      color: var(--text); margin-bottom: 3px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .ec-m { font-size: 12px; color: var(--text-m); display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+    .played-tag { display: inline-flex; align-items: center; gap: 3px; color: var(--green); font-weight: 600; font-size: 11px; }
+
+    .ec-acts { display: flex; gap: 4px; flex-shrink: 0; }
+    .eb {
+      width: 30px; height: 30px; border: none;
+      border-radius: 7px; background: transparent;
+      color: var(--text-s); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; transition: background var(--t), color var(--t);
+    }
+    .eb:hover { background: var(--surface3); color: var(--text); }
+    .eb.on { color: var(--accent); }
+
+    /* Detail header */
+    .pdh { display: flex; gap: 16px; margin-bottom: 22px; align-items: flex-start; padding: 0 24px; }
+    .pdh-art {
+      width: 100px; height: 100px; border-radius: var(--r);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 40px;
+      box-shadow: var(--sh);
+    }
+    .pdh-info { flex: 1; }
+    .pdh-t { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 20px; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .pdh-a { color: var(--text-m); font-size: 13px; margin-bottom: 10px; }
+    .badge { display: inline-flex; align-items: center; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; letter-spacing: 0.02em; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-m); background: none; border: none; cursor: pointer; padding: 16px 24px 12px; transition: color var(--t); }
+    .back-btn:hover { color: var(--accent); }
+
+    /* ── Sidebar ─────────────────────────────────── */
+    #sidebar {
+      grid-area: sidebar;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    #player { padding: 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+
+    .np-pill {
+      display: none; align-items: center; gap: 5px;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 10px; font-weight: 700;
+      padding: 3px 9px; border-radius: 99px;
+      margin-bottom: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .np-pill.on { display: inline-flex; }
+    .np-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; animation: pulse 1.3s ease infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.7);opacity:0.4} }
+
+    .pl-art-wrap { margin-bottom: 13px; position: relative; }
+    #pl-art-ph {
+      width: 100%; aspect-ratio: 1; border-radius: var(--r);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center; font-size: 48px;
+    }
+    #pl-art { width: 100%; border-radius: var(--r); aspect-ratio: 1; object-fit: cover; display: none; }
+
+    /* waveform decoration */
+    .waveform {
+      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: flex-end; gap: 2px; height: 20px;
+      opacity: 0; transition: opacity var(--t);
+    }
+    .waveform.on { opacity: 1; }
+    .wf-bar {
+      width: 3px; border-radius: 2px;
+      background: rgba(255,255,255,0.75);
+      animation: wave 0.9s ease-in-out infinite;
+    }
+    .wf-bar:nth-child(1){height:8px;animation-delay:0s}
+    .wf-bar:nth-child(2){height:14px;animation-delay:0.12s}
+    .wf-bar:nth-child(3){height:18px;animation-delay:0.24s}
+    .wf-bar:nth-child(4){height:12px;animation-delay:0.36s}
+    .wf-bar:nth-child(5){height:16px;animation-delay:0.18s}
+    .wf-bar:nth-child(6){height:10px;animation-delay:0.3s}
+    .wf-bar:nth-child(7){height:14px;animation-delay:0.06s}
+    @keyframes wave { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.35)} }
+
+    .pl-info { margin-bottom: 12px; }
+    #pl-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 2px; }
+    #pl-show { font-size: 11px; color: var(--accent); font-weight: 600; }
+
+    /* Progress */
+    .prog-wrap { margin-bottom: 9px; }
+    .prog-outer { width: 100%; height: 3px; background: var(--surface3); border-radius: 99px; cursor: pointer; position: relative; margin-bottom: 5px; }
+    .prog-fill { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.1s linear; position: relative; }
+    .prog-fill::after { content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 0 3px var(--accent-glow); opacity: 0; transition: opacity var(--t); }
+    .prog-outer:hover .prog-fill::after { opacity: 1; }
+    .prog-times { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-m); font-variant-numeric: tabular-nums; }
+
+    .pl-ctrls { display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 11px; }
+    .ctrl {
+      width: 34px; height: 34px; border: none; background: transparent;
+      color: var(--text-m); border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; transition: background var(--t), color var(--t);
+    }
+    .ctrl:hover { background: var(--surface2); color: var(--text); }
+    .ctrl.play {
+      width: 42px; height: 42px;
+      background: var(--accent); color: #fff; font-size: 16px;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: background var(--t), transform var(--t);
+    }
+    .ctrl.play:hover { background: var(--accent-h); }
+    .skip-w { display: flex; flex-direction: column; align-items: center; }
+    .skip-w span { font-size: 7px; font-weight: 700; line-height: 1; margin-top: 0; }
+
+    .speed-row { display: flex; gap: 3px; justify-content: center; margin-bottom: 10px; }
+    .spd {
+      padding: 3px 6px; border: 1px solid var(--border-s);
+      border-radius: 4px; background: transparent;
+      color: var(--text-m); font-family: 'Instrument Sans', sans-serif;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all var(--t);
+    }
+    .spd:hover { border-color: var(--accent); color: var(--accent); }
+    .spd.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .vol-row { display: flex; align-items: center; gap: 8px; }
+    .vib { width: 24px; height: 24px; border: none; background: none; color: var(--text-m); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .vib:hover { color: var(--text); }
+    #vs {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 3px;
+      background: linear-gradient(to right, var(--accent) var(--vp,80%), var(--surface3) var(--vp,80%));
+      border-radius: 99px; outline: none; cursor: pointer;
+    }
+    #vs::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 11px; background: var(--accent); border-radius: 50%; cursor: pointer; }
+
+    /* Tabs */
+    .sb-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sbt {
+      flex: 1; padding: 10px 5px;
+      border: none; background: none; color: var(--text-m);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      transition: color var(--t), border-color var(--t);
+    }
+    .sbt.on { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .sb-body { flex: 1; overflow-y: auto; }
+    .sbp { display: none; }
+    .sbp.on { display: block; }
+
+    .qi {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 14px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background var(--t);
+    }
+    .qi:hover { background: var(--surface2); }
+    .qi.playing { background: var(--accent-soft); }
+    .qi-th { width: 36px; height: 36px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .qi-inf { flex: 1; min-width: 0; }
+    .qi-t { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .qi-m { font-size: 11px; color: var(--text-m); }
+    .qi-rm { width: 20px; height: 20px; border: none; background: none; color: var(--text-s); cursor: pointer; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+    .qi-rm:hover { background: var(--surface3); color: var(--text-m); }
+
+    .empty-st { padding: 28px 14px; text-align: center; color: var(--text-m); font-size: 13px; }
+    .empty-st i { font-size: 24px; display: block; margin-bottom: 8px; color: var(--text-s); }
+
+    /* Toast */
+    #tw { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+    .toast { background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 500; box-shadow: var(--sh-lg); animation: tin 0.2s ease; pointer-events: all; }
+    .toast.out { animation: tout 0.2s ease forwards; }
+    @keyframes tin { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    @keyframes tout { to{opacity:0;transform:translateY(-6px)} }
+
+    .spin { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--surface3); border-top-color: var(--accent); border-radius: 50%; animation: rot 0.7s linear infinite; }
+    @keyframes rot { to{transform:rotate(360deg)} }
+    .loading { display: flex; align-items: center; justify-content: center; padding: 48px; }
+
+    /* ── New Episodes strip ────────────────────── */
+    .new-eps-strip {
+      display: flex; gap: 10px;
+      overflow-x: auto; padding-bottom: 6px;
+      scrollbar-width: none;
+    }
+    .new-eps-strip::-webkit-scrollbar { display: none; }
+
+    .nep-card {
+      flex-shrink: 0; width: 220px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 12px 13px;
+      cursor: pointer;
+      display: flex; flex-direction: column; gap: 8px;
+      transition: transform var(--t), box-shadow var(--t), border-color var(--t);
+    }
+    .nep-card:hover { transform: translateY(-2px); box-shadow: var(--sh); border-color: var(--border-s); }
+
+    .nep-top { display: flex; align-items: center; gap: 9px; }
+    .nep-emoji {
+      width: 36px; height: 36px; border-radius: 8px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
+    .nep-show { font-size: 11px; font-weight: 600; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nep-date { font-size: 10px; color: var(--text-s); margin-top: 1px; }
+    .nep-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; line-height: 1.35; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .nep-actions { display: flex; gap: 5px; }
+    .nep-btn {
+      padding: 5px 10px; border: none; border-radius: 6px;
+      font-family: 'Instrument Sans', sans-serif; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: background var(--t), color var(--t);
+    }
+    .nep-play { background: var(--accent); color: #fff; }
+    .nep-play:hover { background: var(--accent-h); }
+    .nep-queue { background: var(--surface2); color: var(--text-m); }
+    .nep-queue:hover { background: var(--surface3); color: var(--text); }
+
+    .nep-empty {
+      background: var(--surface); border: 1px dashed var(--border-s);
+      border-radius: var(--r); padding: 20px 24px;
+      color: var(--text-m); font-size: 13px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nep-empty i { font-size: 20px; color: var(--text-s); flex-shrink: 0; }
+
+    /* ── Tweaks panel ──────────────────────────── */
+    #tweaks-panel {
+      display: none;
+      position: fixed; bottom: 24px; right: 24px;
+      width: 240px;
+      background: var(--surface);
+      border: 1px solid var(--border-s);
+      border-radius: var(--r);
+      box-shadow: var(--sh-lg);
+      z-index: 9999;
+      overflow: hidden;
+      font-family: 'Instrument Sans', sans-serif;
+    }
+    #tweaks-panel.visible { display: block; }
+
+    .tp-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px 11px;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 13px; letter-spacing: -0.01em;
+    }
+    .tp-close { width: 22px; height: 22px; border: none; background: none; color: var(--text-m); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+    .tp-close:hover { background: var(--surface2); color: var(--text); }
+
+    .tp-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 14px; }
+
+    .tp-row { display: flex; flex-direction: column; gap: 6px; }
+    .tp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-m); }
+
+    .tp-swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tp-swatch {
+      width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent;
+      cursor: pointer; transition: transform var(--t), border-color var(--t);
+    }
+    .tp-swatch:hover { transform: scale(1.15); }
+    .tp-swatch.on { border-color: var(--text); }
+
+    .tp-segs { display: flex; background: var(--surface2); border-radius: 7px; padding: 3px; gap: 2px; }
+    .tp-seg {
+      flex: 1; padding: 5px 4px; border: none; border-radius: 5px;
+      background: transparent; color: var(--text-m);
+      font-family: 'Instrument Sans', sans-serif; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all var(--t); text-align: center; white-space: nowrap;
+    }
+    .tp-seg.on { background: var(--surface); color: var(--text); box-shadow: var(--sh-sm); }
+
+    .tp-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+    .tp-toggle-lbl { font-size: 12px; color: var(--text); }
+    .tp-toggle {
+      width: 36px; height: 20px; border-radius: 99px;
+      background: var(--surface3); border: none; cursor: pointer;
+      position: relative; transition: background var(--t); flex-shrink: 0;
+    }
+    .tp-toggle.on { background: var(--accent); }
+    .tp-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%; background: #fff;
+      transition: transform var(--t);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .tp-toggle.on::after { transform: translateX(16px); }
+
+    @media(max-width:768px){
+      #app{grid-template-columns:1fr;grid-template-rows:var(--nav-h) 1fr auto;grid-template-areas:"nav""main""sidebar";}
+      #sidebar{border-left:none;border-top:1px solid var(--border);max-height:48vh;}
+      .pl-art-wrap{display:none;}
+      .pg{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Navbar -->
+  <nav id="navbar">
+    <a class="logo" href="#" onclick="showHome();return false;">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 14c0-4.4 3.6-8 8-8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M20 10c0 4.4-3.6 8-8 8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M7.5 17.5c0-2.5 2-4.5 4.5-4.5" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+          <path d="M16.5 6.5c0 2.5-2 4.5-4.5 4.5" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+          <circle cx="12" cy="12" r="1.8" fill="white"/>
+        </svg>
+      </div>
+      Airwave
+    </a>
+
+    <div class="search-row">
+      <div class="sf">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="si" placeholder="Search podcasts or topics…" />
+      </div>
+      <button class="btn-go" onclick="doSearch()">Search</button>
+    </div>
+
+    <select id="hsel" onchange="loadHist(this.value)"><option value="">History…</option></select>
+
+    <div class="nav-end">
+      <button class="ib" id="theme-btn" onclick="toggleTheme()">
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main id="main">
+
+    <!-- Home -->
+    <div class="view active" id="view-home">
+      <!-- Hero -->
+      <div class="hero" id="hero-wrap">
+        <div class="hero-bg" id="hero-bg">🎙️</div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-label">Featured Today</div>
+          <div class="hero-title" id="hero-title">The Podcast You Can't Stop Listening To</div>
+          <div class="hero-sub" id="hero-sub">Featured show</div>
+          <button class="hero-cta" id="hero-cta" onclick="openHero()">
+            <i class="fa-solid fa-play"></i> Listen Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Category strip -->
+      <div style="padding-top:18px;">
+        <div class="cat-strip" id="cat-strip"></div>
+      </div>
+
+      <!-- New from Saved Podcasts -->
+      <div class="sec" id="new-from-saved-sec">
+        <div class="sh">
+          <h2 class="sh-t">New from Your Podcasts</h2>
+          <span class="sh-s" id="new-eps-count"></span>
+        </div>
+        <div id="new-eps-strip"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sh">
+          <h2 class="sh-t">Trending Now</h2>
+          <span class="sh-s">Updated daily</span>
+        </div>
+        <div class="pg" id="trending-grid"></div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="view" id="view-search">
+      <div class="sec">
+        <div class="sh"><h2 class="sh-t" id="srch-title">Results</h2></div>
+        <div id="srch-body"></div>
+      </div>
+    </div>
+
+    <!-- Detail -->
+    <div class="view" id="view-detail">
+      <button class="back-btn" onclick="goBack()">
+        <i class="fa-solid fa-arrow-left"></i> Back
+      </button>
+      <div id="det-header"></div>
+      <div class="sec" style="padding-top:0;">
+        <div class="sh">
+          <h2 class="sh-t">Episodes</h2>
+          <span class="sh-s" id="ep-ct"></span>
+        </div>
+        <div id="ep-list"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div id="player">
+      <div class="np-pill" id="np-pill"><span class="np-dot"></span> Now Playing</div>
+
+      <div class="pl-art-wrap">
+        <div id="pl-art-ph">🎧</div>
+        <img id="pl-art" alt="" />
+        <div class="waveform" id="waveform">
+          <div class="wf-bar"></div><div class="wf-bar"></div><div class="wf-bar"></div>
+          <div class="wf-bar"></div><div class="wf-bar"></div><div class="wf-bar"></div>
+          <div class="wf-bar"></div>
+        </div>
+      </div>
+
+      <div class="pl-info">
+        <div id="pl-title" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;line-height:1.4;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">Select an episode to play</div>
+        <div id="pl-show" style="font-size:11px;color:var(--accent);font-weight:600;"></div>
+      </div>
+
+      <div class="prog-wrap">
+        <div class="prog-outer" id="prog-bar" onclick="seekAudio(event)">
+          <div class="prog-fill" id="prog-fill"></div>
+        </div>
+        <div class="prog-times">
+          <span id="t-cur">0:00</span>
+          <span id="t-tot">0:00</span>
+        </div>
+      </div>
+
+      <div class="pl-ctrls">
+        <button class="ctrl" onclick="skip(-15)">
+          <div class="skip-w"><i class="fa-solid fa-rotate-left"></i><span>15</span></div>
+        </button>
+        <button class="ctrl play" id="play-btn" onclick="togglePlay()">
+          <i class="fa-solid fa-play" id="play-icon"></i>
+        </button>
+        <button class="ctrl" onclick="skip(30)">
+          <div class="skip-w"><i class="fa-solid fa-rotate-right"></i><span>30</span></div>
+        </button>
+      </div>
+
+      <div class="speed-row" id="speed-row"></div>
+
+      <div class="vol-row">
+        <button class="vib" onclick="toggleMute()"><i class="fa-solid fa-volume-high" id="vol-icon"></i></button>
+        <input type="range" id="vs" min="0" max="100" value="80" oninput="setVol(this.value)" style="--vp:80%;" />
+      </div>
+    </div>
+
+    <div class="sb-tabs">
+      <button class="sbt on" onclick="switchTab('queue',this)">Queue</button>
+      <button class="sbt" onclick="switchTab('favs',this)">Favorites</button>
+      <button class="sbt" onclick="switchTab('hist',this)">History</button>
+    </div>
+    <div class="sb-body">
+      <div class="sbp on" id="panel-queue"></div>
+      <div class="sbp" id="panel-favs"></div>
+      <div class="sbp" id="panel-hist"></div>
+    </div>
+  </aside>
+</div>
+
+<div id="tw"></div>
+<audio id="audio"></audio>
+
+<!-- Tweaks panel -->
+<div id="tweaks-panel">
+  <div class="tp-head">
+    <span>Tweaks</span>
+    <button class="tp-close" onclick="closeTweaks()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="tp-body">
+    <div class="tp-row">
+      <div class="tp-label">Accent Color</div>
+      <div class="tp-swatches">
+        <div class="tp-swatch on" data-accent="#F97316" data-glow="rgba(249,115,22,0.28)" style="background:#F97316;" onclick="setAccent(this)"></div>
+        <div class="tp-swatch" data-accent="#7C5CFC" data-glow="rgba(124,92,252,0.25)" style="background:#7C5CFC;" onclick="setAccent(this)"></div>
+        <div class="tp-swatch" data-accent="#06B6D4" data-glow="rgba(6,182,212,0.25)" style="background:#06B6D4;" onclick="setAccent(this)"></div>
+        <div class="tp-swatch" data-accent="#22C55E" data-glow="rgba(34,197,94,0.25)"  style="background:#22C55E;" onclick="setAccent(this)"></div>
+        <div class="tp-swatch" data-accent="#E879F9" data-glow="rgba(232,121,249,0.25)" style="background:#E879F9;" onclick="setAccent(this)"></div>
+        <div class="tp-swatch" data-accent="#FB7185" data-glow="rgba(251,113,133,0.25)" style="background:#FB7185;" onclick="setAccent(this)"></div>
+      </div>
+    </div>
+    <div class="tp-row">
+      <div class="tp-label">Appearance</div>
+      <div class="tp-segs" id="tp-theme-segs">
+        <button class="tp-seg" onclick="setTweakTheme('light',this)">Light</button>
+        <button class="tp-seg on" onclick="setTweakTheme('dark',this)">Dark</button>
+      </div>
+    </div>
+    <div class="tp-row">
+      <div class="tp-label">Card Radius</div>
+      <div class="tp-segs">
+        <button class="tp-seg on" data-r="14px" onclick="setRadius(this)">Rounded</button>
+        <button class="tp-seg" data-r="6px"  onclick="setRadius(this)">Sharp</button>
+        <button class="tp-seg" data-r="24px" onclick="setRadius(this)">Pill</button>
+      </div>
+    </div>
+    <div class="tp-row">
+      <div class="tp-toggle-row">
+        <span class="tp-toggle-lbl">Show hero banner</span>
+        <button class="tp-toggle on" id="tp-hero-toggle" onclick="toggleHeroVis(this)"></button>
+      </div>
+      <div class="tp-toggle-row" style="margin-top:8px;">
+        <span class="tp-toggle-lbl">Waveform animation</span>
+        <button class="tp-toggle on" id="tp-wave-toggle" onclick="toggleWaveVis(this)"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────
+const TRENDING = [
+  {id:1, title:'The Daily',             author:'The New York Times', emoji:'📰', bg:'linear-gradient(135deg,#1a1a2e,#16213e)', cat:'News'},
+  {id:2, title:'Crime Junkie',          author:'audiochuck',         emoji:'🔍', bg:'linear-gradient(135deg,#2d1b4e,#1a0a2e)', cat:'True Crime'},
+  {id:3, title:'Huberman Lab',          author:'Andrew Huberman',    emoji:'🧠', bg:'linear-gradient(135deg,#0a3d62,#1e3799)', cat:'Health'},
+  {id:4, title:'Lex Fridman Podcast',   author:'Lex Fridman',        emoji:'🤖', bg:'linear-gradient(135deg,#1a1a1a,#3a3a3a)', cat:'Technology'},
+  {id:5, title:'How I Built This',      author:'NPR',                emoji:'🚀', bg:'linear-gradient(135deg,#1e3a1e,#2d5a27)', cat:'Business'},
+  {id:6, title:'SmartLess',            author:'Jason Bateman & Co.', emoji:'😂', bg:'linear-gradient(135deg,#3a1c71,#d76d77)', cat:'Comedy'},
+  {id:7, title:'Radiolab',             author:'WNYC Studios',        emoji:'🔬', bg:'linear-gradient(135deg,#134e5e,#71b280)', cat:'Science'},
+  {id:8, title:'Serial',               author:'Serial Productions',  emoji:'📻', bg:'linear-gradient(135deg,#373b44,#4286f4)', cat:'Investigative'},
+];
+const CATS = ['All','News','True Crime','Health','Technology','Business','Comedy','Science'];
+const MOCK_EPS = p => [
+  {id:`${p.id}-1`,title:'How AI Is Reshaping Everything We Know',     date:'Apr 22, 2026',dur:'42 min',src:''},
+  {id:`${p.id}-2`,title:'The Week That Changed Everything',            date:'Apr 19, 2026',dur:'38 min',src:''},
+  {id:`${p.id}-3`,title:'Deep Dive: What Happens Next',               date:'Apr 15, 2026',dur:'55 min',src:''},
+  {id:`${p.id}-4`,title:'Interview: The Future of Work',              date:'Apr 10, 2026',dur:'1h 12 min',src:''},
+  {id:`${p.id}-5`,title:'Breaking Down the Numbers',                  date:'Apr 7, 2026',dur:'29 min',src:''},
+].map(ep=>({...ep,podcastTitle:p.title,podcastEmoji:p.emoji,podcastBg:p.bg}));
+
+// ── State ─────────────────────────────────────────────────────────
+const audio = document.getElementById('audio');
+const S = {
+  cur:null, playing:false, speed:1, vol:80, muted:false,
+  queue:   JSON.parse(localStorage.getItem('aw_q')   ||'[]'),
+  favs:    JSON.parse(localStorage.getItem('aw_favs') ||'[]'),
+  hist:    JSON.parse(localStorage.getItem('aw_hist') ||'[]'),
+  played:  JSON.parse(localStorage.getItem('aw_done') ||'[]'),
+  sh:      JSON.parse(localStorage.getItem('aw_sh')   ||'[]'),
+  view:'home', prevView:null, heroPodcast:null,
+};
+
+const $  = id => document.getElementById(id);
+const fT = s => { const m=Math.floor(s/60),sec=Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; };
+const isFav  = id => S.favs.some(f=>f.id===id);
+const isDone = id => S.played.includes(id);
+const save   = (k,v) => localStorage.setItem(k,JSON.stringify(v));
+const J      = o => JSON.stringify(o).replace(/'/g,"&#39;").replace(/"/g,'&quot;');
+
+// ── Views ─────────────────────────────────────────────────────────
+function showView(n){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  $('view-'+n).classList.add('active');
+  S.prevView=S.view; S.view=n;
+}
+function showHome(){ showView('home'); renderTrending(TRENDING); }
+function goBack() { S.prevView?showView(S.prevView):showHome(); }
+
+// ── Hero ──────────────────────────────────────────────────────────
+let _heroPod = TRENDING[0];
+function renderHero(){
+  _heroPod = TRENDING[Math.floor(Math.random()*TRENDING.length)];
+  $('hero-bg').textContent = _heroPod.emoji;
+  $('hero-bg').style.background = _heroPod.bg;
+  $('hero-title').textContent = _heroPod.title;
+  $('hero-sub').textContent   = _heroPod.author;
+}
+function openHero(){ openPodcast(_heroPod); }
+
+// ── Trending ──────────────────────────────────────────────────────
+function renderTrending(list){
+  $('trending-grid').innerHTML = list.map((p,i)=>`
+    <div class="pc" onclick='openPodcast(${J(p)})'>
+      <div class="pc-art-wrap">
+        <div class="pc-art-ph" style="background:${p.bg};">${p.emoji}</div>
+        <span class="pc-rank">#${TRENDING.indexOf(p)+1}</span>
+        <button class="fav-btn ${isFav(p.id)?'on':''}" onclick="event.stopPropagation();toggleFav(${J(p)})">
+          <i class="fa-${isFav(p.id)?'solid':'regular'} fa-heart"></i>
+        </button>
+      </div>
+      <div class="pc-body">
+        <div class="pc-t">${p.title}</div>
+        <div class="pc-a">${p.author}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderCats(){
+  $('cat-strip').innerHTML = CATS.map(c=>`
+    <button class="cat ${c==='All'?'on':''}" onclick="filterCat('${c}',this)">${c}</button>`).join('');
+}
+
+function filterCat(cat,btn){
+  document.querySelectorAll('.cat').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  renderTrending(cat==='All'?TRENDING:TRENDING.filter(p=>p.cat===cat));
+}
+
+// ── Podcast detail ────────────────────────────────────────────────
+function openPodcast(p){
+  $('det-header').innerHTML = `
+    <div class="pdh">
+      <div class="pdh-art" style="background:${p.bg||'var(--surface2)'};">${p.emoji||'🎙️'}</div>
+      <div class="pdh-info">
+        <div class="pdh-t">${p.title}</div>
+        <div class="pdh-a">${p.author||''}</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          ${p.cat?`<span class="badge">${p.cat}</span>`:''}
+          <button class="btn-go" id="fav-btn" style="padding:5px 13px;font-size:12px;border-radius:99px;" onclick="toggleFav(${J(p)});this.textContent=isFav(p.id)?'♥ Saved':'♡ Save';">
+            ${isFav(p.id)?'♥ Saved':'♡ Save'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  const eps = MOCK_EPS(p);
+  $('ep-ct').textContent = eps.length+' episodes';
+  renderEps(eps, $('ep-list'));
+  showView('detail');
+}
+
+async function openPodcastAPI(p){
+  $('det-header').innerHTML = `
+    <div class="pdh">
+      <div class="pdh-art" style="background:${p.bg||'linear-gradient(135deg,#F97316,#c2410c)'};">
+        ${p.artwork?`<img src="${p.artwork}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />`:'🎙️'}
+      </div>
+      <div class="pdh-info">
+        <div class="pdh-t">${p.title}</div>
+        <div class="pdh-a">${p.author||''}</div>
+        <button class="btn-go" id="fav-btn" style="margin-top:10px;padding:5px 13px;font-size:12px;border-radius:99px;" onclick="toggleFav(${J(p)});this.textContent=isFav(p.id)?'♥ Saved':'♡ Save';">
+          ${isFav(p.id)?'♥ Saved':'♡ Save'}
+        </button>
+      </div>
+    </div>`;
+  $('ep-list').innerHTML = '<div class="loading"><div class="spin"></div></div>';
+  showView('detail');
+  try{
+    const r=await fetch(`/api/episodes?feedId=${p.itunesId}&max=20`);
+    const d=await r.json();
+    const eps=(d.items||[]).map(ep=>({
+      id:ep.id, title:ep.title,
+      date:new Date(ep.datePublished*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+      dur:fmtDur(ep.duration), src:ep.enclosureUrl,
+      podcastTitle:p.title, podcastEmoji:'🎙️',
+      podcastBg:'linear-gradient(135deg,#F97316,#c2410c)', artwork:p.artwork,
+    }));
+    $('ep-ct').textContent=eps.length+' episodes';
+    renderEps(eps,$('ep-list'));
+  } catch(e){
+    renderEps(MOCK_EPS({id:p.id,title:p.title,emoji:'🎙️',bg:'linear-gradient(135deg,#F97316,#c2410c)'}), $('ep-list'));
+  }
+}
+
+function fmtDur(s){ if(!s)return''; const h=Math.floor(s/3600),m=Math.floor((s%3600)/60); return h?`${h}h ${m}m`:`${m} min`; }
+
+function renderEps(eps, container){
+  container.innerHTML = `<div class="el">${eps.map(ep=>`
+    <div class="ec ${S.cur?.id===ep.id?'playing':''} ${isDone(ep.id)?'played':''}" id="ec-${ep.id}">
+      <div class="ec-thumb" style="background:${ep.podcastBg||'var(--surface2)'};">${ep.podcastEmoji||'🎙️'}</div>
+      <div class="ec-info" onclick='playEp(${J(ep)})'>
+        <div class="ec-t">${ep.title}</div>
+        <div class="ec-m">
+          <span>${ep.date||''}</span>
+          ${ep.dur?`<span>·</span><span>${ep.dur}</span>`:''}
+          ${isDone(ep.id)?'<span class="played-tag"><i class="fa-solid fa-circle-check"></i> Played</span>':''}
+        </div>
+      </div>
+      <div class="ec-acts">
+        <button class="eb ${isDone(ep.id)?'on':''}" onclick="event.stopPropagation();markPlayed(${J(ep)},this)" title="Mark played">
+          <i class="fa-${isDone(ep.id)?'solid':'regular'} fa-circle-check"></i>
+        </button>
+        <button class="eb" onclick="event.stopPropagation();addQ(${J(ep)})" title="Add to queue">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ── Search ────────────────────────────────────────────────────────
+async function doSearch(){
+  const q=$('si').value.trim(); if(!q)return;
+  saveSH(q); showView('search');
+  $('srch-title').textContent=`"${q}"`;
+  $('srch-body').innerHTML='<div class="loading"><div class="spin"></div></div>';
+  try{
+    const r=await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+    const d=await r.json(); const feeds=d.feeds||[];
+    if(!feeds.length){ $('srch-body').innerHTML='<div class="empty-st"><i class="fa-solid fa-magnifying-glass"></i><p>No results found</p></div>'; return; }
+    const grid=document.createElement('div'); grid.className='pg';
+    grid.innerHTML=feeds.map(p=>{
+      const pd={id:p.id,title:p.title,author:p.author,artwork:p.artwork||p.image,itunesId:p.itunesId,bg:'linear-gradient(135deg,#F97316,#c2410c)'};
+      return `<div class="pc" onclick='openPodcastAPI(${J(pd)})'>
+        <div class="pc-art-wrap">
+          ${pd.artwork?`<img class="pc-art" src="${pd.artwork}" loading="lazy" />`:`<div class="pc-art-ph" style="background:${pd.bg};">🎙️</div>`}
+          <button class="fav-btn ${isFav(p.id)?'on':''}" onclick="event.stopPropagation();toggleFav(${J(pd)})">
+            <i class="fa-${isFav(p.id)?'solid':'regular'} fa-heart"></i>
+          </button>
+        </div>
+        <div class="pc-body"><div class="pc-t">${p.title}</div><div class="pc-a">${p.author||''}</div></div>
+      </div>`;
+    }).join('');
+    $('srch-body').innerHTML=''; $('srch-body').appendChild(grid);
+  } catch(e){
+    const grid=document.createElement('div'); grid.className='pg';
+    grid.innerHTML=TRENDING.map(p=>`<div class="pc" onclick='openPodcast(${J(p)})'>
+      <div class="pc-art-wrap">
+        <div class="pc-art-ph" style="background:${p.bg};">${p.emoji}</div>
+        <button class="fav-btn ${isFav(p.id)?'on':''}" onclick="event.stopPropagation();toggleFav(${J(p)})">
+          <i class="fa-${isFav(p.id)?'solid':'regular'} fa-heart"></i>
+        </button>
+      </div>
+      <div class="pc-body"><div class="pc-t">${p.title}</div><div class="pc-a">${p.author}</div></div>
+    </div>`).join('');
+    $('srch-body').innerHTML=''; $('srch-body').appendChild(grid);
+  }
+}
+
+function saveSH(q){ S.sh=[q,...S.sh.filter(s=>s!==q)].slice(0,10); save('aw_sh',S.sh); renderSH(); }
+function renderSH(){ $('hsel').innerHTML='<option value="">History…</option>'+S.sh.map(q=>`<option value="${q}">${q}</option>`).join(''); }
+function loadHist(q){ if(!q)return; $('si').value=q; doSearch(); }
+
+$('si').addEventListener('keydown',e=>{ if(e.key==='Enter') doSearch(); });
+
+// ── Player ────────────────────────────────────────────────────────
+function playEp(ep){
+  S.cur=ep;
+  $('pl-title').textContent=ep.title;
+  $('pl-show').textContent=ep.podcastTitle||'';
+  $('np-pill').classList.add('on');
+  if(ep.artwork){ $('pl-art').src=ep.artwork; $('pl-art').style.display='block'; $('pl-art-ph').style.display='none'; }
+  else { $('pl-art').style.display='none'; $('pl-art-ph').textContent=ep.podcastEmoji||'🎧'; $('pl-art-ph').style.display='flex'; }
+  if(ep.src){ audio.src=ep.src; audio.play().then(()=>{ S.playing=true; updPlay(); }).catch(()=>{}); }
+  else { S.playing=true; updPlay(); }
+  $('waveform').classList.toggle('on', S.playing && tweaks.showWave);
+  addHist(ep);
+  document.querySelectorAll('.ec').forEach(c=>c.classList.remove('playing'));
+  const card=$('ec-'+ep.id); if(card) card.classList.add('playing');
+  savePS();
+}
+
+function togglePlay(){
+  if(!S.cur)return;
+  if(S.playing){ audio.pause(); S.playing=false; }
+  else { audio.play().catch(()=>{}); S.playing=true; }
+  updPlay();
+  $('waveform').classList.toggle('on', S.playing && tweaks.showWave);
+}
+function updPlay(){ $('play-icon').className=S.playing?'fa-solid fa-pause':'fa-solid fa-play'; }
+function skip(s){ if(audio.src) audio.currentTime=Math.max(0,audio.currentTime+s); }
+function seekAudio(e){ const r=$('prog-bar').getBoundingClientRect(); if(audio.duration) audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration; }
+function setSpeed(s){ S.speed=s; audio.playbackRate=s; document.querySelectorAll('.spd').forEach(b=>b.classList.toggle('on',parseFloat(b.dataset.s)===s)); }
+function setVol(v){ S.vol=v; S.muted=false; audio.volume=v/100; audio.muted=false; $('vs').style.setProperty('--vp',v+'%'); updVI(v); }
+function toggleMute(){ S.muted=!S.muted; audio.muted=S.muted; updVI(S.muted?0:S.vol); }
+function updVI(v){ $('vol-icon').className=v==0?'fa-solid fa-volume-xmark':v<50?'fa-solid fa-volume-low':'fa-solid fa-volume-high'; }
+
+audio.addEventListener('timeupdate',()=>{
+  const d=audio.duration||0, c=audio.currentTime||0;
+  $('prog-fill').style.width=(d?(c/d*100):0)+'%';
+  $('t-cur').textContent=fT(c); $('t-tot').textContent=fT(d);
+  if(Math.floor(c)%5===0) savePS();
+});
+audio.addEventListener('ended',()=>{ S.playing=false; updPlay(); $('waveform').classList.remove('on'); if(S.cur) markPlayed(S.cur); playNext(); });
+
+// ── Queue ─────────────────────────────────────────────────────────
+function addQ(ep){ if(S.queue.find(q=>q.id===ep.id)){toast('Already in queue');return;} S.queue.push(ep); save('aw_q',S.queue); renderQ(); toast('Added to queue ✓'); }
+function rmQ(id){ S.queue=S.queue.filter(q=>q.id!==id); save('aw_q',S.queue); renderQ(); }
+function playNext(){ if(!S.queue.length)return; const n=S.queue.shift(); save('aw_q',S.queue); playEp(n); renderQ(); }
+
+function renderQ(){
+  const p=$('panel-queue');
+  if(!S.queue.length){ p.innerHTML='<div class="empty-st"><i class="fa-solid fa-list-music"></i><p>Queue is empty</p><p style="margin-top:3px;font-size:12px;">Tap + on any episode</p></div>'; return; }
+  p.innerHTML=S.queue.map(ep=>`
+    <div class="qi ${S.cur?.id===ep.id?'playing':''}">
+      <div class="qi-th" style="background:${ep.podcastBg||'var(--surface2)'};">${ep.podcastEmoji||'🎙️'}</div>
+      <div class="qi-inf" onclick='playEp(${J(ep)})'>
+        <div class="qi-t">${ep.title}</div>
+        <div class="qi-m">${ep.podcastTitle||''}</div>
+      </div>
+      <button class="qi-rm" onclick="rmQ('${ep.id}')"><i class="fa-solid fa-xmark"></i></button>
+    </div>`).join('');
+}
+
+// ── Favorites ─────────────────────────────────────────────────────
+function toggleFav(p){ if(isFav(p.id)){S.favs=S.favs.filter(f=>f.id!==p.id);}else{S.favs.push(p);} save('aw_favs',S.favs); renderFavs(); renderTrending(TRENDING); renderNewFromFavs(); }
+function renderFavs(){
+  const p=$('panel-favs');
+  if(!S.favs.length){ p.innerHTML='<div class="empty-st"><i class="fa-regular fa-heart"></i><p>No favorites yet</p><p style="margin-top:3px;font-size:12px;">Tap ♥ on any podcast</p></div>'; return; }
+  p.innerHTML=S.favs.map(f=>`
+    <div class="qi" onclick='openPodcast(${J(f)})'>
+      <div class="qi-th" style="background:${f.bg||f.podcastBg||'var(--surface2)'};">${f.emoji||f.podcastEmoji||'🎙️'}</div>
+      <div class="qi-inf"><div class="qi-t">${f.title}</div><div class="qi-m">${f.author||f.podcastTitle||''}</div></div>
+      <button class="qi-rm" onclick="event.stopPropagation();toggleFav(${J(f)})"><i class="fa-solid fa-heart" style="color:var(--pink);"></i></button>
+    </div>`).join('');
+}
+
+// ── Played ────────────────────────────────────────────────────────
+function markPlayed(ep, btn){
+  if(isDone(ep.id)){S.played=S.played.filter(p=>p!==ep.id);}else{S.played.push(ep.id);}
+  save('aw_done',S.played);
+  const card=$('ec-'+ep.id);
+  if(card){
+    card.classList.toggle('played',isDone(ep.id));
+    const meta=card.querySelector('.ec-m'); const ex=meta?.querySelector('.played-tag');
+    if(isDone(ep.id)&&meta&&!ex) meta.insertAdjacentHTML('beforeend','<span class="played-tag"><i class="fa-solid fa-circle-check"></i> Played</span>');
+    else if(!isDone(ep.id)&&ex) ex.remove();
+    if(btn){ btn.classList.toggle('on',isDone(ep.id)); btn.querySelector('i').className=`fa-${isDone(ep.id)?'solid':'regular'} fa-circle-check`; }
+  }
+}
+
+// ── History ───────────────────────────────────────────────────────
+function addHist(ep){ S.hist=[{...ep,at:new Date().toISOString()},...S.hist.filter(h=>h.id!==ep.id)].slice(0,50); save('aw_hist',S.hist); renderHist(); }
+function renderHist(){
+  const p=$('panel-hist');
+  if(!S.hist.length){ p.innerHTML='<div class="empty-st"><i class="fa-solid fa-clock-rotate-left"></i><p>Nothing played yet</p></div>'; return; }
+  p.innerHTML=S.hist.map(ep=>`
+    <div class="qi" onclick='playEp(${J(ep)})'>
+      <div class="qi-th" style="background:${ep.podcastBg||'var(--surface2)'};">${ep.podcastEmoji||'🎙️'}</div>
+      <div class="qi-inf">
+        <div class="qi-t">${ep.title}</div>
+        <div class="qi-m">${ep.podcastTitle||''} · ${new Date(ep.at).toLocaleDateString()}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────
+function switchTab(name,btn){
+  document.querySelectorAll('.sbt').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.sbp').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on'); $('panel-'+name).classList.add('on');
+}
+
+// ── Theme ─────────────────────────────────────────────────────────
+function toggleTheme(){
+  const light=document.documentElement.getAttribute('data-theme')==='light';
+  document.documentElement.setAttribute('data-theme',light?'dark':'light');
+  $('theme-btn').innerHTML=light?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
+  save('aw_theme',light?'dark':'light');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+function toast(msg,ms=2800){
+  const w=$('tw'), t=document.createElement('div'); t.className='toast'; t.textContent=msg; w.appendChild(t);
+  setTimeout(()=>{ t.classList.add('out'); t.addEventListener('animationend',()=>t.remove()); },ms);
+}
+
+// ── Speed row ─────────────────────────────────────────────────────
+function renderSpeedRow(){
+  $('speed-row').innerHTML=[0.75,1,1.25,1.5,2].map(s=>
+    `<button class="spd ${s===1?'on':''}" data-s="${s}" onclick="setSpeed(${s})">${s}×</button>`
+  ).join('');
+}
+
+// ── Persist ───────────────────────────────────────────────────────
+function savePS(){ if(S.cur) save('aw_ps',{ep:S.cur,t:audio.currentTime}); }
+
+// ── New from Saved Podcasts ───────────────────────────────────────
+const NEW_EP_TITLES = [
+  'The Episode Everyone Is Talking About',
+  'Breaking: What Just Happened',
+  'A Deep Dive You Won\'t Regret',
+  'This Week\'s Must-Listen',
+  'Exclusive: An Interview You Need to Hear',
+  'The Follow-Up We\'ve All Been Waiting For',
+];
+
+function renderNewFromFavs() {
+  const strip = $('new-eps-strip');
+  const countEl = $('new-eps-count');
+  if (!S.favs.length) {
+    strip.innerHTML = `<div class="nep-empty"><i class="fa-regular fa-bookmark"></i><span>Save podcasts to see new episodes here — tap ♥ on any show.</span></div>`;
+    countEl.textContent = '';
+    return;
+  }
+  // Generate one "latest" episode per saved podcast
+  const newEps = S.favs.map((p, i) => {
+    const title = NEW_EP_TITLES[i % NEW_EP_TITLES.length];
+    const daysAgo = i === 0 ? 'Today' : i === 1 ? 'Yesterday' : `${i + 1} days ago`;
+    const ep = {
+      id: `nep-${p.id}`,
+      title,
+      date: daysAgo,
+      dur: `${28 + (i * 7) % 40} min`,
+      src: '',
+      podcastTitle: p.title,
+      podcastEmoji: p.emoji || '🎙️',
+      podcastBg: p.bg || p.podcastBg || 'var(--surface2)',
+    };
+    return ep;
+  });
+  countEl.textContent = `${newEps.length} new`;
+  strip.innerHTML = `<div class="new-eps-strip">${newEps.map(ep => `
+    <div class="nep-card">
+      <div class="nep-top">
+        <div class="nep-emoji" style="background:${ep.podcastBg};">${ep.podcastEmoji}</div>
+        <div>
+          <div class="nep-show">${ep.podcastTitle}</div>
+          <div class="nep-date">${ep.date}</div>
+        </div>
+      </div>
+      <div class="nep-title">${ep.title}</div>
+      <div class="nep-actions">
+        <button class="nep-btn nep-play" onclick='playEp(${J(ep)})'>
+          <i class="fa-solid fa-play"></i> Play
+        </button>
+        <button class="nep-btn nep-queue" onclick='addQ(${J(ep)})'>
+          <i class="fa-solid fa-plus"></i> Queue
+        </button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ── Tweaks ────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#F97316",
+  "accentGlow": "rgba(249,115,22,0.28)",
+  "theme": "dark",
+  "radius": "24px",
+  "showHero": true,
+  "showWave": true
+}/*EDITMODE-END*/;
+
+let tweaks = {...TWEAK_DEFAULTS};
+
+function applyTweaks(t) {
+  const r = document.documentElement;
+  r.style.setProperty('--accent',      t.accent);
+  r.style.setProperty('--accent-h',    shadeColor(t.accent, -12));
+  r.style.setProperty('--accent-soft', t.accentGlow.replace('0.28','0.12'));
+  r.style.setProperty('--accent-glow', t.accentGlow);
+  r.style.setProperty('--r',           t.radius);
+  r.style.setProperty('--r-sm',        parseFloat(t.radius) > 10 ? '9px' : '5px');
+  document.documentElement.setAttribute('data-theme', t.theme);
+  $('hero-wrap').style.display = t.showHero ? '' : 'none';
+  const waveToggle = $('tp-wave-toggle');
+  if (waveToggle) waveToggle.classList.toggle('on', t.showWave);
+  const heroToggle = $('tp-hero-toggle');
+  if (heroToggle) heroToggle.classList.toggle('on', t.showHero);
+  // sync theme segs
+  document.querySelectorAll('#tp-theme-segs .tp-seg').forEach(b => {
+    b.classList.toggle('on', b.textContent.toLowerCase() === t.theme);
+  });
+  // sync swatches
+  document.querySelectorAll('.tp-swatch').forEach(s => {
+    s.classList.toggle('on', s.dataset.accent === t.accent);
+  });
+  // sync theme btn icon
+  const tb = $('theme-btn');
+  if (tb) tb.innerHTML = t.theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+}
+
+function shadeColor(hex, pct) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, Math.max(0, (n >> 16) + pct));
+  const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + pct));
+  const b = Math.min(255, Math.max(0, (n & 0xff) + pct));
+  return '#' + [r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+function setAccent(el) {
+  tweaks.accent = el.dataset.accent;
+  tweaks.accentGlow = el.dataset.glow;
+  applyTweaks(tweaks);
+  postTweaks();
+}
+
+function setTweakTheme(theme, btn) {
+  tweaks.theme = theme;
+  document.querySelectorAll('#tp-theme-segs .tp-seg').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  applyTweaks(tweaks);
+  save('aw_theme', theme);
+  postTweaks();
+}
+
+function setRadius(btn) {
+  tweaks.radius = btn.dataset.r;
+  btn.closest('.tp-segs').querySelectorAll('.tp-seg').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  applyTweaks(tweaks);
+  postTweaks();
+}
+
+function toggleHeroVis(btn) {
+  tweaks.showHero = !tweaks.showHero;
+  btn.classList.toggle('on', tweaks.showHero);
+  applyTweaks(tweaks);
+  postTweaks();
+}
+
+function toggleWaveVis(btn) {
+  tweaks.showWave = !tweaks.showWave;
+  btn.classList.toggle('on', tweaks.showWave);
+  if (!tweaks.showWave) $('waveform').classList.remove('on');
+  postTweaks();
+}
+
+function postTweaks() {
+  window.parent.postMessage({ type: '__edit_mode_set_keys', edits: tweaks }, '*');
+}
+
+function openTweaks()  { $('tweaks-panel').classList.add('visible'); }
+function closeTweaks() {
+  $('tweaks-panel').classList.remove('visible');
+  window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+}
+
+// Tweaks host protocol
+window.addEventListener('message', e => {
+  if (e.data?.type === '__activate_edit_mode')   openTweaks();
+  if (e.data?.type === '__deactivate_edit_mode') closeTweaks();
+});
+window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+
+// ── Init ──────────────────────────────────────────────────────────
+(function init(){
+  const t=localStorage.getItem('aw_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  $('theme-btn').innerHTML=t==='dark'?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
+
+  renderSpeedRow(); renderCats(); renderHero(); renderTrending(TRENDING);
+  renderQ(); renderFavs(); renderHist(); renderSH(); renderNewFromFavs();
+  applyTweaks(tweaks);
+  audio.volume=S.vol/100;
+
+  const ps=JSON.parse(localStorage.getItem('aw_ps')||'null');
+  if(ps&&ps.ep){
+    S.cur=ps.ep;
+    $('pl-title').textContent=ps.ep.title;
+    $('pl-show').textContent=ps.ep.podcastTitle||'';
+    $('np-pill').classList.add('on');
+    if(ps.ep.artwork){ $('pl-art').src=ps.ep.artwork; $('pl-art').style.display='block'; $('pl-art-ph').style.display='none'; }
+    else { $('pl-art-ph').textContent=ps.ep.podcastEmoji||'🎧'; }
+    if(ps.ep.src){ audio.src=ps.ep.src; audio.currentTime=ps.t||0; }
+  }
+})();
+</script>
+</body>
+</html>
