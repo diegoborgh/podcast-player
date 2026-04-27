@@ -126,8 +126,8 @@ function openPodcast(p) {
         <div class="pdh-a">${H(p.author || '')}</div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px;">
           ${p.cat ? `<span class="badge">${H(p.cat)}</span>` : ''}
-          <button class="btn-go" style="padding:5px 13px;font-size:12px;border-radius:99px;"
-            onclick="toggleFav(${J(p)});this.textContent=isFav(p.id)?'♥ Saved':'♡ Save';">
+          <button class="btn-go fav-detail-btn ${isFav(p.id) ? 'saved' : ''}" data-pid="${p.id}" style="padding:5px 13px;font-size:12px;border-radius:99px;"
+            onclick="toggleFav(${J(p)});">
             ${isFav(p.id) ? '♥ Saved' : '♡ Save'}
           </button>
         </div>
@@ -150,8 +150,8 @@ async function openPodcastAPI(p) {
       <div class="pdh-info">
         <div class="pdh-t">${H(p.title)}</div>
         <div class="pdh-a">${H(p.author || '')}</div>
-        <button class="btn-go" style="margin-top:10px;padding:5px 13px;font-size:12px;border-radius:99px;"
-          onclick="toggleFav(${J(p)});this.textContent=isFav(p.id)?'♥ Saved':'♡ Save';">
+        <button class="btn-go fav-detail-btn ${isFav(p.id) ? 'saved' : ''}" data-pid="${p.id}" style="margin-top:10px;padding:5px 13px;font-size:12px;border-radius:99px;"
+          onclick="toggleFav(${J(p)});">
           ${isFav(p.id) ? '♥ Saved' : '♡ Save'}
         </button>
       </div>
@@ -324,7 +324,7 @@ function playEp(ep) {
     S.playing = false;
     updPlay();
   }
-  $('waveform').classList.toggle('on', S.playing);
+  document.querySelectorAll('.waveform').forEach(w => w.classList.toggle('on', S.playing));
   addHist(ep);
   document.querySelectorAll('.ec').forEach(c => c.classList.remove('playing'));
   const card = $('ec-' + ep.id);
@@ -337,7 +337,7 @@ function togglePlay() {
   if (S.playing) { audio.pause(); S.playing = false; }
   else { audio.play().catch(() => {}); S.playing = true; }
   updPlay();
-  $('waveform').classList.toggle('on', S.playing);
+  document.querySelectorAll('.waveform').forEach(w => w.classList.toggle('on', S.playing));
 }
 function updPlay() { $('play-icon').className = S.playing ? 'fa-solid fa-pause' : 'fa-solid fa-play'; }
 function skip(s)   { if (audio.src) audio.currentTime = Math.max(0, audio.currentTime + s); }
@@ -356,7 +356,7 @@ audio.addEventListener('timeupdate', () => {
 });
 audio.addEventListener('ended', () => {
   S.playing = false; updPlay();
-  $('waveform').classList.remove('on');
+  document.querySelectorAll('.waveform').forEach(w => w.classList.remove('on'));
   if (S.cur) markPlayed(S.cur);
   playNext();
 });
@@ -401,6 +401,10 @@ function toggleFav(p) {
     btn.classList.toggle('on', on);
     const i = btn.querySelector('i');
     if (i) i.className = `fa-${on ? 'solid' : 'regular'} fa-heart`;
+  });
+  document.querySelectorAll(`.fav-detail-btn[data-pid="${p.id}"]`).forEach(btn => {
+    btn.classList.toggle('saved', on);
+    btn.textContent = on ? '♥ Saved' : '♡ Save';
   });
 }
 
