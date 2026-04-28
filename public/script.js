@@ -489,14 +489,6 @@ function switchTab(name, btn) {
   $('panel-' + name).classList.add('on');
 }
 
-// ── Theme ─────────────────────────────────────────────────────────
-function toggleTheme() {
-  const light = document.documentElement.getAttribute('data-theme') === 'light';
-  document.documentElement.setAttribute('data-theme', light ? 'dark' : 'light');
-  $('theme-btn').innerHTML = light ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-  save('aw_theme', light ? 'dark' : 'light');
-}
-
 // ── Toast ─────────────────────────────────────────────────────────
 function toast(msg, ms = 2800) {
   const w = $('tw'), t = document.createElement('div');
@@ -631,10 +623,6 @@ document.addEventListener('keydown', e => {
 
 // ── Init ──────────────────────────────────────────────────────────
 (function init() {
-  const t = localStorage.getItem('aw_theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-  $('theme-btn').innerHTML = t === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-
   renderSpeedRow();
   renderCats();
   renderQ();

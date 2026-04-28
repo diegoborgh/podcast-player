@@ -1,4 +1,4 @@
-const cacheName = 'airwave-v19';
+const cacheName = 'airwave-v24';
 const assetsToCache = [
   '/',
   '/index.html',
