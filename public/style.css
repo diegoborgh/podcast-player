@@ -625,6 +625,9 @@ html, body {
   .pdh,.pdh-desc,.back-btn{padding-left:14px;padding-right:14px;}
 
   .new-eps-strip{grid-template-columns:1fr;gap:8px;}
+  #app:has(#sidebar.collapsed) .new-eps-strip{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+  #app:has(#sidebar.collapsed) .nep-body{padding-right:22px;}
+  #app:has(#sidebar.collapsed) .nep-art{width:56px;}
   .nep-card{padding:8px;gap:10px;min-height:84px;}
   .nep-art{width:64px;}
   .nep-art-emoji{font-size:24px;}
