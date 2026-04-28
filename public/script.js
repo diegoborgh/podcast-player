@@ -10,6 +10,15 @@ const TRENDING_FALLBACK = [
   {id:8, title:'Serial',             author:'Serial Productions',  emoji:'📻', bg:'linear-gradient(135deg,#373b44,#4286f4)', cat:'Investigative'},
 ];
 const CATS = ['All','News','True Crime','Health','Technology','Business','Comedy','Science'];
+const CAT_GENRE = {
+  'News': 1489,
+  'True Crime': 1488,
+  'Health': 1512,
+  'Technology': 1318,
+  'Business': 1321,
+  'Comedy': 1303,
+  'Science': 1533,
+};
 
 const MOCK_EPS = p => [
   {id:`${p.id}-1`,title:'How AI Is Reshaping Everything We Know',  date:'Apr 22, 2026',dur:'42 min',src:''},
@@ -29,6 +38,7 @@ const S = {
   played:  JSON.parse(localStorage.getItem('aw_done') || '[]'),
   sh:      JSON.parse(localStorage.getItem('aw_sh')   || '[]'),
   trending: [...TRENDING_FALLBACK],
+  trendingByCat: {},
   view: 'home', prevView: null,
 };
 
@@ -102,10 +112,44 @@ function renderCats() {
   ).join('');
 }
 
-function filterCat(cat, btn) {
+const normCat = s => String(s || '').replace(/\s+/g, '').toLowerCase();
+
+function mapTopFeed(f, cat) {
+  return {
+    id: f.id,
+    title: f.title,
+    author: f.author || '',
+    artwork: f.artwork || '',
+    itunesId: f.itunesId,
+    bg: 'linear-gradient(135deg,#F97316,#c2410c)',
+    cat: f.category || cat || '',
+    description: f.description || '',
+  };
+}
+
+async function filterCat(cat, btn) {
   document.querySelectorAll('.cat').forEach(c => c.classList.remove('on'));
   btn.classList.add('on');
-  renderTrending(cat === 'All' ? S.trending : S.trending.filter(p => p.cat === cat));
+  if (cat === 'All') { renderTrending(S.trending); return; }
+
+  if (S.trendingByCat[cat]) { renderTrending(S.trendingByCat[cat]); return; }
+
+  try {
+    const genre = CAT_GENRE[cat];
+    const url = genre ? `/api/top?genre=${genre}&limit=50` : `/api/top?limit=50`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const list = (d.feeds || []).map(f => mapTopFeed(f, cat));
+    if (list.length) {
+      S.trendingByCat[cat] = list;
+      renderTrending(list);
+      return;
+    }
+  } catch (e) { /* fall through to fallback */ }
+
+  const target = normCat(cat);
+  const fb = TRENDING_FALLBACK.filter(p => normCat(p.cat) === target);
+  renderTrending(fb.length ? fb : S.trending);
 }
 
 // ── Podcast routing ───────────────────────────────────────────────
@@ -566,44 +610,28 @@ function renderNewFromFavs() {
     };
     return `
     <div class="nep-card">
-      <div class="nep-top">
-        <div class="nep-emoji" style="background:${ep.podcastBg};">
-          ${ep.artwork ? `<img src="${ep.artwork}" style="width:100%;height:100%;object-fit:cover;" />` : ep.podcastEmoji}
-        </div>
-        <div>
-          <div class="nep-show">${ep.podcastTitle}</div>
-          <div class="nep-date">${ep.date}</div>
-        </div>
+      <div class="nep-art" style="background:${ep.podcastBg};">
+        ${ep.artwork ? `<img src="${ep.artwork}" loading="lazy" />` : `<span class="nep-art-emoji">${ep.podcastEmoji}</span>`}
       </div>
-      <div class="nep-title">${ep.title}</div>
-      <div class="nep-actions">
-        <button class="nep-btn nep-play" onclick='playLatestFromFav(${J(p)})'>
-          <i class="fa-solid fa-play"></i> Play
-        </button>
-        <button class="nep-btn nep-queue" onclick='addQ(${J(ep)})'>
-          <i class="fa-solid fa-plus"></i> Queue
-        </button>
+      <div class="nep-body">
+        <div class="nep-show">${ep.podcastTitle}</div>
+        <div class="nep-title" onclick='playLatestFromFav(${J(p)})' title="Play latest episode">${ep.title}</div>
+        <div class="nep-date">${ep.date}</div>
       </div>
+      <button class="nep-queue" onclick='addQ(${J(ep)})' title="Add to queue" aria-label="Add to queue">
+        <i class="fa-solid fa-plus"></i>
+      </button>
     </div>`;
   }).join('')}</div>`;
 }
 
-// ── Trending fetch ────────────────────────────────────────────────
+// ── Trending fetch (Apple Top Podcasts) ──────────────────────────
 async function fetchTrending() {
   try {
-    const r = await fetch('/api/trending');
+    const r = await fetch('/api/top?limit=50');
     const d = await r.json();
     if (d.feeds && d.feeds.length) {
-      S.trending = d.feeds.map(f => ({
-        id: f.id,
-        title: f.title,
-        author: f.author || '',
-        artwork: f.artwork || f.image || '',
-        itunesId: f.itunesId,
-        bg: 'linear-gradient(135deg,#F97316,#c2410c)',
-        cat: f.categories ? Object.values(f.categories)[0] : '',
-        description: f.description || '',
-      }));
+      S.trending = d.feeds.map(f => mapTopFeed(f));
     }
   } catch (e) {
     // Keep TRENDING_FALLBACK already in S.trending

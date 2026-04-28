@@ -12,6 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api/search', require('./api/search'));
 app.get('/api/episodes', require('./api/episodes'));
 app.get('/api/trending', require('./api/trending'));
+app.get('/api/top', require('./api/top'));
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
