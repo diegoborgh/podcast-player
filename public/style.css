@@ -242,7 +242,7 @@ html, body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 700; font-size: 13px; line-height: 1.35;
   color: var(--text); display: -webkit-box;
-  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden; margin-bottom: 3px;
 }
 .pc-a { font-size: 12px; color: var(--text-m); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -296,7 +296,7 @@ html, body {
 .ec-t {
   font-weight: 600; font-size: 14px; line-height: 1.35;
   color: var(--text); margin-bottom: 3px;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .ec-m { font-size: 12px; color: var(--text-m); display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
 .played-tag { display: inline-flex; align-items: center; gap: 3px; color: var(--green); font-weight: 600; font-size: 11px; }
@@ -336,8 +336,8 @@ html, body {
 .badge { display: inline-flex; align-items: center; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; letter-spacing: 0.02em; }
 
 .pdh-desc { padding: 0 24px; margin: -10px 0 22px; color: var(--text-m); font-size: 13.5px; line-height: 1.55; }
-.pdh-desc-text { white-space: pre-wrap; word-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.pdh-desc.expanded .pdh-desc-text { -webkit-line-clamp: unset; display: block; }
+.pdh-desc-text { white-space: pre-wrap; word-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pdh-desc.expanded .pdh-desc-text { -webkit-line-clamp: unset; line-clamp: unset; display: block; }
 .pdh-desc-toggle { background: none; border: none; color: var(--accent); font-weight: 700; font-size: 12px; letter-spacing: 0.04em; cursor: pointer; padding: 6px 0 0; }
 .pdh-desc-toggle:hover { color: var(--accent-h); }
 .back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-m); background: none; border: none; cursor: pointer; padding: 16px 24px 12px; transition: color var(--t); }
@@ -411,7 +411,7 @@ html, body {
 .pl-info { margin-bottom: 12px; }
 #pl-title {
   font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px;
-  line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2;
+  line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 2px;
 }
 #pl-show { font-size: 11px; color: var(--accent); font-weight: 600; }
@@ -527,7 +527,8 @@ html, body {
 }
 .nep-card:hover { transform: translateY(-2px); box-shadow: var(--sh); border-color: var(--border-s); }
 
-.nep-top { display: flex; align-items: center; gap: 9px; }
+.nep-top { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.nep-top > div:last-child { min-width: 0; flex: 1; }
 .nep-emoji {
   width: 36px; height: 36px; border-radius: 8px;
   flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 17px;
@@ -535,7 +536,7 @@ html, body {
 }
 .nep-show { font-size: 11px; font-weight: 600; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nep-date { font-size: 10px; font-weight: 600; color: rgba(244,243,248,0.75); margin-top: 1px; }
-.nep-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; line-height: 1.35; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.nep-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; line-height: 1.35; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .nep-actions { display: flex; gap: 5px; }
 .nep-btn {
   padding: 5px 10px; border: none; border-radius: 6px;
@@ -661,15 +662,6 @@ html, body {
   }
 }
 
-@media(min-width:1600px){
-  #navbar{padding:0 80px;}
-  #main{padding-left:80px;padding-right:80px;}
-  .sec{padding-left:0;padding-right:0;}
-  .cat-strip{padding-left:0;padding-right:0;}
-  .pdh{padding-left:0;padding-right:0;}
-  .pdh-desc{padding-left:0;padding-right:0;}
-  .back-btn{padding-left:0;padding-right:0;}
-  .new-eps-strip{grid-template-columns:repeat(4,1fr);}
-  .hero{margin:0;}
-  .hero-overlay{background:linear-gradient(to right, transparent 0%, transparent 40%, rgba(26,10,0,0.95) 70%, var(--bg) 100%);}
+@media(min-width:1431px){
+  #app{max-width:1431px;margin:0 auto;}
 }
