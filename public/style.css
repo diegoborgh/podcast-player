@@ -183,7 +183,9 @@ html, body {
   line-height: 1.15; letter-spacing: -0.02em;
   color: #fff; margin-bottom: 6px;
   max-width: 340px;
+  cursor: pointer;
 }
+.hero-title:hover { color: var(--accent); }
 .hero-sub { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 16px; }
 .hero-cta {
   display: inline-flex; align-items: center; gap: 7px;

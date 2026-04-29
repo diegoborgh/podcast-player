@@ -84,7 +84,8 @@ function renderHero() {
   $('hero-title').textContent = _heroPod.title;
   $('hero-sub').textContent   = _heroPod.author || '';
 }
-function openHero() { clickPodcast(_heroPod); }
+function openHero()        { playLatestFromFav(_heroPod); }
+function openHeroPodcast() { clickPodcast(_heroPod); }
 
 // ── Trending ──────────────────────────────────────────────────────
 function renderTrending(list) {
